@@ -1,0 +1,28 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+description: "Indexes transfers of the CurioCards ERC1155 Wrapper"
+dataSources:
+  - kind: ethereum/contract
+    name: CurioERC1155Wrapper
+    network: mainnet
+    source:
+      address: "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313"
+      abi: CurioERC1155Wrapper
+      startBlock: 12129118
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - TransferSingle
+        - TransferBatch
+      abis:
+        - name: CurioERC1155Wrapper
+          file: ./abis/CurioERC1155Wrapper.json
+      eventHandlers:
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+      file: ./src/mapping.ts

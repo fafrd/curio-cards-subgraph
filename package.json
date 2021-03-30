@@ -1,0 +1,16 @@
+{
+  "name": "curio-cards-subgraph",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ fafrd/curio-cards-subgraph",
+    "create-local": "graph create --node http://localhost:8020/ fafrd/curio-cards-subgraph",
+    "remove-local": "graph remove --node http://localhost:8020/ fafrd/curio-cards-subgraph",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 fafrd/curio-cards-subgraph"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.20.0",
+    "@graphprotocol/graph-ts": "0.20.0"
+  }
+}
