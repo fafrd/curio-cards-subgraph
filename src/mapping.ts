@@ -1,70 +1,41 @@
 import { BigInt } from "@graphprotocol/graph-ts"
-import {
-  CurioERC1155Wrapper,
-  OwnershipTransferred,
-  TransferSingle,
-  TransferBatch,
-  ApprovalForAll,
-  URI
-} from "../generated/CurioERC1155Wrapper/CurioERC1155Wrapper"
-import { ExampleEntity } from "../generated/schema"
+import { CurioERC1155Wrapper, TransferSingle, TransferBatch } from "../generated/CurioERC1155Wrapper/CurioERC1155Wrapper"
+import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { CardHolder, CardBalance } from "../generated/schema"
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+export function handleTransferSingle(event: TransferSingle): void {
+  let cardHolder = CardHolder.load(event.params._from.toHex())
+  let balances: Array<String>;
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (entity == null) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
+  let currentBalance = new CardBalance(event.params._id.toString());
+  currentBalance.balance = event.params._value;
+  currentBalance.save();
 
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+  // TODO: found a big bug. 'ID' needs to be globally unique. that means here, ID should be
+  //       something like address-cardid.
+  //       To maintain the ability to query by id, we'll need to implement another field-
+  //       let's call it cardId?
+
+  if (cardHolder == null) {
+    cardHolder = new CardHolder(event.params._from.toHex());
+    balances = [currentBalance.id];
+  } else {
+    balances = cardHolder.holdings;
+
+    // TODO if balance already exists, increment value
+    if () {
+      // load balance
+      // increment
+      // save
+    } else {
+      balances.push(currentBalance.id);
+    }
   }
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
+  cardHolder.holdings = balances;
+  cardHolder.save();
 
-  // Entity fields can be set based on event parameters
-  entity.previousOwner = event.params.previousOwner
-  entity.newOwner = event.params.newOwner
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.balanceOf(...)
-  // - contract.supportsInterface(...)
-  // - contract.uri(...)
-  // - contract.contracts(...)
-  // - contract.balanceOfBatch(...)
-  // - contract.exists(...)
-  // - contract.owner(...)
-  // - contract.isOwner(...)
-  // - contract.proxyRegistryAddress(...)
-  // - contract.metadatas(...)
-  // - contract.isApprovedForAll(...)
+  // TODO i switched from/to above. switch to 'to'. implement from below.
 }
 
-export function handleTransferSingle(event: TransferSingle): void {}
-
 export function handleTransferBatch(event: TransferBatch): void {}
-
-export function handleApprovalForAll(event: ApprovalForAll): void {}
-
-export function handleURI(event: URI): void {}
