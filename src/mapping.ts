@@ -36,6 +36,10 @@ export function handleTransferSingle(event: TransferSingle): void {
         cardHolder_recipient.holdings = newHoldings;
       }
     }
+
+    // calculate number of unique cards
+    cardHolder_recipient.uniqueCards = cardHolder_recipient.holdings.length;
+
     cardHolder_recipient.save();
   }
 
@@ -66,6 +70,10 @@ export function handleTransferSingle(event: TransferSingle): void {
         cardHolder_sender.holdings = newHoldings;
       }
     }
+
+    // calculate number of unique cards
+    cardHolder_sender.uniqueCards = cardHolder_sender.holdings.length;
+
     cardHolder_sender.save();
   }
 
@@ -110,6 +118,10 @@ export function handleTransferBatch(event: TransferBatch): void {
         }
       }
     }
+
+    // calculate number of unique cards
+    cardHolder_recipient.uniqueCards = cardHolder_recipient.holdings.length;
+
     cardHolder_recipient.save();
   }
 
@@ -147,6 +159,10 @@ export function handleTransferBatch(event: TransferBatch): void {
         }
       }
     }
+
+    // calculate number of unique cards
+    cardHolder_sender.uniqueCards = cardHolder_sender.holdings.length;
+
     cardHolder_sender.save();
   }
 
