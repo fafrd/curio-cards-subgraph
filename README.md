@@ -4,9 +4,9 @@ This is a subgraph (index) of all [Curio Cards](https://curio.cards) holdings.
 
 ## How the indexing works
 
-First, take a look at schema.graphql. This defines the datatypes stored as a result of the indexing. `CardHolder` is the main type, it contains the id (address) and holdings (as an array of `CardBalances`). `CardBalances` is a simple pair between card # and the balance thereof.
+First, take a look at [schema.graphql](schema.graphql). This defines the datatypes stored as a result of the indexing. `CardHolder` is the main type, it contains the id (address) and holdings (as an array of `CardBalances`). `CardBalances` is a simple pair between card # and the balance thereof.
 
-The indexing logic then happens in src/mappings.ts. `handleTransferSingle` fires in response to the contract emitting a `TransferSingle` event. It will calculate the updated card holdings for the sender and recipient and call `.save()` to store these updated entries.
+The indexing logic then happens in [src/mapping.ts](src/mapping.ts). `handleTransferSingle` fires in response to the contract emitting a `TransferSingle` event. It will calculate the updated card holdings for the sender and recipient and call `.save()` to store these updated entries.
 
 ## How to use the api
 
