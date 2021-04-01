@@ -4,38 +4,150 @@ import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { CardHolder, CardBalance } from "../generated/schema"
 
 export function handleTransferSingle(event: TransferSingle): void {
-  let cardHolder = CardHolder.load(event.params._from.toHex())
-  let balances: Array<String>;
+  /*
+   *  Increment balance of recipient
+   */
 
-  let currentBalance = new CardBalance(event.params._id.toString());
-  currentBalance.balance = event.params._value;
-  currentBalance.save();
-
-  // TODO: found a big bug. 'ID' needs to be globally unique. that means here, ID should be
-  //       something like address-cardid.
-  //       To maintain the ability to query by id, we'll need to implement another field-
-  //       let's call it cardId?
-
-  if (cardHolder == null) {
-    cardHolder = new CardHolder(event.params._from.toHex());
-    balances = [currentBalance.id];
-  } else {
-    balances = cardHolder.holdings;
-
-    // TODO if balance already exists, increment value
-    if () {
-      // load balance
-      // increment
-      // save
+  // try to load recipient CardBalance. if null, create a new recipient
+  if (event.params._to.toHex() != "0x0000000000000000000000000000000000000000"
+     && event.params._from.toHex() != "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313") {
+    let newBalanceId_recipient = event.params._to.toHex() + "-" + event.params._id.toString();
+    let newBalance_recipient = CardBalance.load(newBalanceId_recipient);
+    if (newBalance_recipient == null) {
+      newBalance_recipient = new CardBalance(newBalanceId_recipient);
+      newBalance_recipient.cardNumber = event.params._id;
+      newBalance_recipient.balance = event.params._value;
+      newBalance_recipient.save();
     } else {
-      balances.push(currentBalance.id);
+      newBalance_recipient.balance += event.params._value;
+      newBalance_recipient.save();
     }
+
+    // try to load recipient CardHolder. if null, create a new recipient
+    let cardHolder_recipient = CardHolder.load(event.params._to.toHex())
+    if (cardHolder_recipient == null) {
+      cardHolder_recipient = new CardHolder(event.params._to.toHex());
+      cardHolder_recipient.holdings = [newBalance_recipient.id];
+    } else {
+      // if balance not in cardHolder_recipient, add it
+      if (cardHolder_recipient.holdings.indexOf(newBalance_recipient.id) == -1) {
+        let newHoldings = cardHolder_recipient.holdings;
+        newHoldings.push(newBalance_recipient.id);
+        cardHolder_recipient.holdings = newHoldings;
+      }
+    }
+    cardHolder_recipient.save();
   }
 
-  cardHolder.holdings = balances;
-  cardHolder.save();
+  /*
+   *  Decrement balance of sender
+   */
+  if (event.params._from.toHex() != "0x0000000000000000000000000000000000000000"
+     && event.params._from.toHex() != "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313") {
+    // load CardBalance
+    let newBalanceId_sender = event.params._from.toHex() + "-" + event.params._id.toString();
+    let newBalance_sender = CardBalance.load(newBalanceId_sender);
+    if (newBalance_sender == null) {
+      throw "should never happen"
+    } else {
+      newBalance_sender.balance -= event.params._value;
+      newBalance_sender.save();
+    }
 
-  // TODO i switched from/to above. switch to 'to'. implement from below.
+    // load sender CardHolder
+    let cardHolder_sender = CardHolder.load(event.params._from.toHex())
+    if (cardHolder_sender == null) {
+      throw "should never happen"
+    } else {
+      // if balance not in cardHolder_sender, add it
+      if (cardHolder_sender.holdings.indexOf(newBalance_sender.id) == -1) {
+        let newHoldings = cardHolder_sender.holdings;
+        newHoldings.push(newBalance_sender.id);
+        cardHolder_sender.holdings = newHoldings;
+      }
+    }
+    cardHolder_sender.save();
+  }
+
 }
 
-export function handleTransferBatch(event: TransferBatch): void {}
+export function handleTransferBatch(event: TransferBatch): void {
+  /*
+   *  Increment balance of recipient
+   */
+
+  if (event.params._to.toHex() != "0x0000000000000000000000000000000000000000"
+     && event.params._from.toHex() != "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313") {
+    // try to load CardBalances. if null, create new recipients
+    let newBalanceList: Array<String> = [];
+    for (let i = 0; i < event.params._ids.length; i++) {
+      let newBalanceId_recipient = event.params._to.toHex() + "-" + (event.params._ids as Array<BigInt>)[i].toString();
+      let newBalance_recipient = CardBalance.load(newBalanceId_recipient);
+      if (newBalance_recipient == null) {
+        newBalance_recipient = new CardBalance(newBalanceId_recipient);
+        newBalance_recipient.cardNumber = (event.params._ids as Array<BigInt>)[i];
+        newBalance_recipient.balance = (event.params._values as Array<BigInt>)[i];
+        newBalance_recipient.save();
+      } else {
+        newBalance_recipient.balance += (event.params._values as Array<BigInt>)[i];
+        newBalance_recipient.save();
+      }
+      newBalanceList.push(newBalance_recipient.id);
+    }
+
+    // try to load recipient CardHolder. if null, create a new recipient
+    let cardHolder_recipient = CardHolder.load(event.params._to.toHex())
+    if (cardHolder_recipient == null) {
+      cardHolder_recipient = new CardHolder(event.params._to.toHex());
+      cardHolder_recipient.holdings = newBalanceList;
+    } else {
+      // if balance not in cardHolder_recipient, add it
+      for (let i = 0; i < event.params._ids.length; i++) {
+        if (cardHolder_recipient.holdings.indexOf(newBalanceList[i]) == -1) {
+          let newHoldings = cardHolder_recipient.holdings;
+          newHoldings.push(newBalanceList[i]);
+          cardHolder_recipient.holdings = newHoldings;
+        }
+      }
+    }
+    cardHolder_recipient.save();
+  }
+
+  /*
+   *  Decrement balance of sender
+   */
+
+  if (event.params._from.toHex() != "0x0000000000000000000000000000000000000000"
+     && event.params._from.toHex() != "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313") {
+    // load CardBalances
+    let newBalanceList: Array<String> = [];
+    for (let i = 0; i < event.params._ids.length; i++) {
+      let newBalanceId_sender = event.params._from.toHex() + "-" + (event.params._ids as Array<BigInt>)[i].toString();
+      let newBalance_sender = CardBalance.load(newBalanceId_sender);
+      if (newBalance_sender == null) {
+        throw "should never happen"
+      } else {
+        newBalance_sender.balance -= (event.params._values as Array<BigInt>)[i];
+        newBalance_sender.save();
+      }
+      newBalanceList.push(newBalance_sender.id);
+    }
+
+    // load sender CardHolder
+    let cardHolder_sender = CardHolder.load(event.params._from.toHex())
+    if (cardHolder_sender == null) {
+      throw "should never happen"
+    } else {
+      // if balance not in cardHolder_sender, add it
+      for (let i = 0; i < event.params._ids.length; i++) {
+        if (cardHolder_sender.holdings.indexOf(newBalanceList[i]) == -1) {
+          let newHoldings = cardHolder_sender.holdings;
+          newHoldings.push(newBalanceList[i]);
+          cardHolder_sender.holdings = newHoldings;
+        }
+      }
+    }
+    cardHolder_sender.save();
+  }
+
+}
