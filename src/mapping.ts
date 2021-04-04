@@ -37,9 +37,18 @@ export function handleTransferSingle(event: TransferSingle): void {
       }
     }
 
-    // calculate number of unique cards
-    cardHolder_recipient.uniqueCards = cardHolder_recipient.holdings.length;
+    // calculate unique cards held
+    let uniqueCards = 0;
+    for (let i = 0; i < cardHolder_recipient.holdings.length; i++) {
+      // load holdings; determine if balance is > 0
+      let holdings = cardHolder_recipient.holdings;
+      let entry = CardBalance.load(holdings[i]);
+      if (entry.balance != BigInt.fromI32(0)) {
+        uniqueCards++;
+      }
+    }
 
+    cardHolder_recipient.uniqueCards = uniqueCards;
     cardHolder_recipient.save();
   }
 
@@ -71,9 +80,18 @@ export function handleTransferSingle(event: TransferSingle): void {
       }
     }
 
-    // calculate number of unique cards
-    cardHolder_sender.uniqueCards = cardHolder_sender.holdings.length;
+    // calculate unique cards held
+    let uniqueCards = 0;
+    for (let i = 0; i < cardHolder_sender.holdings.length; i++) {
+      // load holdings; determine if balance is > 0
+      let holdings = cardHolder_sender.holdings;
+      let entry = CardBalance.load(holdings[i]);
+      if (entry.balance != BigInt.fromI32(0)) {
+        uniqueCards++;
+      }
+    }
 
+    cardHolder_sender.uniqueCards = uniqueCards;
     cardHolder_sender.save();
   }
 
@@ -119,9 +137,18 @@ export function handleTransferBatch(event: TransferBatch): void {
       }
     }
 
-    // calculate number of unique cards
-    cardHolder_recipient.uniqueCards = cardHolder_recipient.holdings.length;
+    // calculate unique cards held
+    let uniqueCards = 0;
+    for (let i = 0; i < cardHolder_recipient.holdings.length; i++) {
+      // load holdings; determine if balance is > 0
+      let holdings = cardHolder_recipient.holdings;
+      let entry = CardBalance.load(holdings[i]);
+      if (entry.balance != BigInt.fromI32(0)) {
+        uniqueCards++;
+      }
+    }
 
+    cardHolder_recipient.uniqueCards = uniqueCards;
     cardHolder_recipient.save();
   }
 
@@ -160,9 +187,18 @@ export function handleTransferBatch(event: TransferBatch): void {
       }
     }
 
-    // calculate number of unique cards
-    cardHolder_sender.uniqueCards = cardHolder_sender.holdings.length;
+    // calculate unique cards held
+    let uniqueCards = 0;
+    for (let i = 0; i < cardHolder_sender.holdings.length; i++) {
+      // load holdings; determine if balance is > 0
+      let holdings = cardHolder_sender.holdings;
+      let entry = CardBalance.load(holdings[i]);
+      if (entry.balance != BigInt.fromI32(0)) {
+        uniqueCards++;
+      }
+    }
 
+    cardHolder_sender.uniqueCards = uniqueCards;
     cardHolder_sender.save();
   }
 
