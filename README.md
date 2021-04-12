@@ -2,6 +2,8 @@
 
 This is a subgraph (index) of all [Curio Cards](https://curio.cards) holdings.
 
+The subgraph has been deployed at https://thegraph.com/explorer/subgraph/fafrd/curio-cards
+
 ## How the indexing works
 
 First, take a look at [schema.graphql](schema.graphql). This defines the datatypes stored as a result of the indexing. `CardHolder` is the main type, it contains the id (address) and holdings (as an array of `CardBalances`). `CardBalances` is a simple pair between card # and the balance thereof.
