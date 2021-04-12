@@ -55,10 +55,20 @@ export function handleTransferSingle(event: TransferSingle): void {
   /*
    *  Decrement balance of sender
    */
-  if (event.params._from.toHex() != "0x0000000000000000000000000000000000000000"
-     && event.params._from.toHex() != "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313") {
+  if (event.params._from.toHex() != "0x0000000000000000000000000000000000000000") {
+
+    let unwrap = false; // special handling for unwrap
+    if (event.params._from.toHex() == "0x73da73ef3a6982109c4d5bdb0db9dd3e3783f313") {
+      unwrap = true;
+    }
+
     // load CardBalance
-    let newBalanceId_sender = event.params._from.toHex() + "-" + event.params._id.toString();
+    let newBalanceId_sender: String;
+    if (unwrap) { // use operator
+      newBalanceId_sender = event.params._operator.toHex() + "-" + event.params._id.toString();
+    } else {
+      newBalanceId_sender = event.params._from.toHex() + "-" + event.params._id.toString();
+    }
     let newBalance_sender = CardBalance.load(newBalanceId_sender);
     if (newBalance_sender == null) {
       throw "should never happen"
@@ -68,7 +78,12 @@ export function handleTransferSingle(event: TransferSingle): void {
     }
 
     // load sender CardHolder
-    let cardHolder_sender = CardHolder.load(event.params._from.toHex())
+    let cardHolder_sender: CardHolder | null
+    if (unwrap) { // use operator
+      cardHolder_sender = CardHolder.load(event.params._operator.toHex())
+    } else {
+      cardHolder_sender = CardHolder.load(event.params._from.toHex())
+    }
     if (cardHolder_sender == null) {
       throw "should never happen"
     } else {
