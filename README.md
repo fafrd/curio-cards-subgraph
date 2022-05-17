@@ -4,6 +4,11 @@ This is a subgraph (index) of all [Curio Cards](https://curio.cards) holdings.
 
 The subgraph has been deployed at https://thegraph.com/explorer/subgraph/fafrd/curio-cards
 
+# Update- I recommend using the new subgraph instead!
+There's a newer, more optimized subgraph at https://github.com/graphrica/CurioCard-Subgraph/, built thanks to [graphrica](https://github.com/graphrica)!
+
+This new subgraph is hosted at https://thegraph.com/explorer/subgraph?id=JBnWrv9pvBvSi2pUZzba3VweGBTde6s44QvsDABP47Gt&view=Overview
+
 ## How the indexing works
 
 First, take a look at [schema.graphql](schema.graphql). This defines the datatypes stored as a result of the indexing. `CardHolder` is the main type, it contains the id (address) and holdings (as an array of `CardBalances`). `CardBalances` is a simple pair between card # and the balance thereof.
